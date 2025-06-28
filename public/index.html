@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>仙人ブラウザー（プロキシ対応）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <button id="backBtn" title="戻る">🔙</button>
+    <button id="forwardBtn" title="進む">🔜</button>
+    <input type="text" id="urlInput" placeholder="URLまたは検索語句" autocomplete="off" />
+    <button id="searchBtn">検索</button>
+    <select id="engineSelect">
+      <option value="https://www.google.com/search?q=">Google</option>
+      <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+      <option value="https://www.bing.com/search?q=">Bing</option>
+    </select>
+    <button id="toggleSidebar" title="履歴表示切替">☰ 履歴</button>
+  </header>
+
+  <div class="container">
+    <aside id="sidebar" class="hidden">
+      <h2>🕘 閲覧履歴</h2>
+      <ul id="historyList"></ul>
+      <button id="clearHistory">🧹 履歴クリア</button>
+    </aside>
+
+    <main>
+      <iframe id="webview" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+    </main>
+  </div>
+
+  <script src="../scripts/main.js" defer></script>
+</body>
+</html>
