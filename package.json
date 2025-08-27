@@ -1,13 +1,15 @@
 {
-  "name": "my-youtube-viewer",
+  "name": "sennin-youtube-viewer",
   "version": "1.0.0",
-  "main": "server.js",
-  "type": "module",
+  "description": "仙人YouTubeビュアー - 自前サーバー版",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "^3.3.2"
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
