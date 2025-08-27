@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>動画再生 - 仙人YouTubeビュアー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e1e2f">
+  <link rel="icon" href="icon-192.png">
+  <style>
+    body { font-family: sans-serif; background: #1e1e2f; color: #fff; margin: 0; }
+    header { background: #27293d; padding: 1em; text-align: center; font-size: 1.2em; }
+    main { padding: 1em; }
+    .player { aspect-ratio: 16/9; background: black; margin-bottom: 1em; }
+    iframe { width: 100%; height: 100%; border: none; }
+    .actions { margin-bottom: 1em; display: flex; gap: 1em; }
+    .btn { padding: 0.5em 1em; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-fav { background: #4caf50; color: #fff; }
+    .btn-back { background: #444667; color: #fff; }
+    h2 { font-size: 1.1em; margin-top: 1em; }
+    .comment { background: #2d2f44; margin: 0.5em 0; padding: 0.5em; border-radius: 6px; }
+    .comment .author { font-weight: bold; margin-right: 0.5em; }
+    .comment .date { font-size: 0.8em; color: #aaa; }
+    .comment .text { margin-top: 0.3em; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header>動画再生</header>
+  <main>
+    <div class="player">
+      <iframe id="player" allowfullscreen></iframe>
+    </div>
+    <div class="actions">
+      <button class="btn btn-back" onclick="window.history.back()">← 戻る</button>
+      <button id="fav-btn" class="btn btn-fav">★ お気に入りに追加</button>
+    </div>
+    <h2>コメント</h2>
+    <div id="comments">読み込み中...</div>
+  </main>
+
+  <script>
+    const STORAGE_HISTORY = 'sennin_youtube_history';
+    const STORAGE_FAV = 'sennin_youtube_favorites';
+
+    const params = new URLSearchParams(window.location.search);
+    const videoId = params.get("id");
+    const player = document.getElementById("player");
+    const favBtn = document.getElementById("fav-btn");
+    const commentsEl = document.getElementById("comments");
+
+    let history = JSON.parse(localStorage.getItem(STORAGE_HISTORY) || '[]');
+    let favorites = JSON.parse(localStorage.getItem(STORAGE_FAV) || '[]');
+
+    if (videoId) {
+      player.src = `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // ✅ コメント読み込み (サーバー経由)
+    async function loadComments() {
+      commentsEl.textContent = "読み込み中...";
+      try {
+        const res = await fetch(`/api/comments/${videoId}`);
+        if (!res.ok) throw new Error("コメント取得失敗");
+        const data = await res.json();
+
+        commentsEl.innerHTML = '';
+        if (!data.comments || data.comments.length === 0) {
+          commentsEl.innerHTML = '<p>コメントがありません。</p>';
+          return;
+        }
+
+        data.comments.slice(0, 30).forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'comment';
+          div.innerHTML = `
+            <div>
+              <span class="author">${c.author}</span>
+              <span class="date">${new Date(c.published * 1000).toLocaleString()}</span>
+            </div>
+            <div class="text">${c.content}</div>
+          `;
+          commentsEl.appendChild(div);
+        });
+      } catch (e) {
+        commentsEl.innerHTML = '<p>コメントの取得に失敗しました。</p>';
+        console.error(e);
+      }
+    }
+
+    // ✅ お気に入り操作
+    function updateFavBtn() {
+      if (favorites.some(v => v.videoId === videoId)) {
+        favBtn.textContent = "★ お気に入り解除";
+      } else {
+        favBtn.textContent = "★ お気に入りに追加";
+      }
+    }
+
+    favBtn.onclick = () => {
+      const idx = favorites.findIndex(v => v.videoId === videoId);
+      if (idx >= 0) {
+        favorites.splice(idx, 1);
+      } else {
+        favorites.unshift({ videoId });
+      }
+      localStorage.setItem(STORAGE_FAV, JSON.stringify(favorites));
+      updateFavBtn();
+    };
+
+    // 初期処理
+    updateFavBtn();
+    loadComments();
+  </script>
+</body>
+</html>
