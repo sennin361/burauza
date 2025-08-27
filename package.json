@@ -1,13 +1,14 @@
 {
   "name": "sennin-youtube-viewer",
   "version": "1.0.0",
-  "description": "仙人YouTubeビュアー - 自前サーバー版",
-  "main": "index.js",
+  "description": "仙人YouTubeビュアー Render版",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "node-fetch": "^3.4.1"
   },
   "engines": {
     "node": "18.x"
